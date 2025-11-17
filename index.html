@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient ID Card Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #3375d3 100%);
+            min-height: 100vh;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: white !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-section {
+                display: block !important;
+                margin: 0;
+                padding: 0;
+            }
+            #printSection {
+                display: block !important;
+            }
+            canvas {
+                max-width: 100% !important;
+                height: auto !important;
+                page-break-inside: avoid;
+            }
+            @page {
+                margin: 15mm;
+                size: A4;
+            }
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .card-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1125/675;
+            cursor: pointer;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card-wrapper.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-side {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .card-front {
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .flip-instruction {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+
+        input, select {
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 0.6rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.4rem;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group label i {
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #1f2937;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-group input[type="file"] {
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        .form-group input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, #667eea 0%, #3375d3 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input[type="file"]::file-selector-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 2rem;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-reset {
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-reset:hover {
+            background-color: #e5e7eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #667eea 0%, #3375d3 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-print:active {
+            transform: translateY(0);
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .preview-actions button {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .preview-actions button:hover {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .preview-actions button.active {
+            background: linear-gradient(135deg, #667eea 0%, #3375d3 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section-title i {
+            color: #667eea;
+        }
+
+        .card-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #3375d3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #eff6ff;
+            color: #1e40af;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen py-12 px-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+              
+                <h1 class="text-5xl font-bold text-white mb-3 drop-shadow-lg">Patient ID Card Generator</h1>
+                <p class="text-white text-lg opacity-90">Create professional patient ID cards</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Form Section -->
+                <div class="card-section no-print">
+                    <h2 class="form-section-title">
+                        <i class="fas fa-user-edit"></i>
+                        Patient Information
+                    </h2>
+                    
+                    <form id="patientForm">
+                        <div class="form-group">
+                            <label for="patientID">
+                                <i class="fas fa-hashtag"></i>
+                                Patient ID
+                            </label>
+                            <input type="text" id="patientID" placeholder="e.g., DS-2024-0001" maxlength="20" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="patientName">
+                                <i class="fas fa-user"></i>
+                                Patient Name
+                            </label>
+                            <input type="text" id="patientName" placeholder="e.g., John Owusu" maxlength="50" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">
+                                <i class="fas fa-venus-mars"></i>
+                                Sex/Gender
+                            </label>
+                            <select id="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact">
+                                <i class="fas fa-phone"></i>
+                                Contact Number
+                            </label>
+                            <input type="tel" id="contact" placeholder="e.g., 0242720000" maxlength="20" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="photo">
+                                <i class="fas fa-camera"></i>
+                                Patient Photo
+                            </label>
+                            <input type="file" id="photo" accept="image/*">
+                            <div class="info-badge">
+                                <i class="fas fa-info-circle"></i>
+                                Square image recommended (1:1 ratio)
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" id="resetBtn" class="btn-reset">
+                                <i class="fas fa-redo"></i>
+                                Reset Form
+                            </button>
+                            <button type="button" id="printBtn" class="btn-print">
+                                <i class="fas fa-print"></i>
+                                Print Card
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="card-section no-print">
+                    <h2 class="form-section-title">
+                        <i class="fas fa-eye"></i>
+                        Card Preview
+                    </h2>
+                    
+                    <div class="card-container">
+                        <div class="card-wrapper" id="cardWrapper">
+                            <div class="card-side card-front">
+                                <canvas id="frontCanvas"></canvas>
+                            </div>
+                            <div class="card-side card-back">
+                                <canvas id="backCanvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="flip-instruction" style="text-align: center; color: #9ca3af; margin-top: 12px; font-size: 13px;">
+                            <i class="fas fa-hand-pointer"></i> Click card to flip
+                        </div>
+                    </div>
+
+                    <div class="preview-actions">
+                        <button id="viewFrontBtn" class="active">
+                            <i class="fas fa-eye"></i>
+                            Front
+                        </button>
+                        <button id="viewBackBtn">
+                            <i class="fas fa-eye"></i>
+                            Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Section (Hidden) -->
+    <div id="printSection" class="print-section hidden" style="display: none;">
+        <div style="page-break-inside: avoid; page-break-after: always; margin-bottom: 40px; padding: 20px;">
+            <h3 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center; color: #333; font-family: 'Inter', sans-serif;">ID CARD - FRONT</h3>
+            <canvas id="printFrontCanvas" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0 auto; border: 2px solid #333; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></canvas>
+        </div>
+        <div style="page-break-inside: avoid; padding: 20px;">
+            <h3 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center; color: #333; font-family: 'Inter', sans-serif;">ID CARD - BACK</h3>
+            <canvas id="printBackCanvas" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0 auto; border: 2px solid #333; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></canvas>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+ 
