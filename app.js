@@ -130,7 +130,7 @@ function updateFrontCard() {
     // Get form data
     const patientID = document.getElementById('patientID').value || 'DS-0000-0000';
     const patientName = document.getElementById('patientName').value || 'Bismark Asiamah Kofi';
-    const gender = document.getElementById('gender').value || 'MALE';
+    const gender = document.getElementById('gender').value || 'Male';
     const contact = document.getElementById('contact').value || '(024) 272-0000';
 
     // Draw photo if available (on the left side)
@@ -156,19 +156,19 @@ function updateFrontCard() {
     ctx.textAlign = 'left';
 
     // Draw patient name - shifted to the right
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('NAME: ' + patientName.substring(0, 30), displayWidth * 0.45, displayHeight * 0.35);
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Name: ' + patientName.substring(0, 30), displayWidth * 0.38, displayHeight * 0.35);
 
     // Draw patient ID - shifted to the right
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('PATIENT ID #:: ' + patientID, displayWidth * 0.45, displayHeight * 0.55);
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Patient ID #:: ' + patientID, displayWidth * 0.38, displayHeight * 0.55);
 
     // Draw gender - shifted to the right
-    ctx.font = '16px Arial';
-    ctx.fillText('GENDER: ' + gender, displayWidth * 0.45, displayHeight * 0.72);
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Gender: ' + gender, displayWidth * 0.38, displayHeight * 0.72);
 
     // Draw contact - shifted to the right
-    ctx.fillText('CONTACT: ' + contact, displayWidth * 0.45, displayHeight * 0.88);
+    ctx.fillText('Contact: ' + contact, displayWidth * 0.38, displayHeight * 0.88);
 }
 
 // Draw back card
@@ -237,18 +237,18 @@ function printCard() {
 
     // Patient name
     ctxFront.font = 'bold 18px Arial';
-    ctxFront.fillText('NAME: ' + patientName.substring(0, 30), width * 0.45, height * 0.35);
+    ctxFront.fillText('NAME: ' + patientName.substring(0, 30), width * 0.38, height * 0.35);
 
     // Patient ID
     ctxFront.font = 'bold 18px Arial';
-    ctxFront.fillText('PATIENT ID #:: ' + patientID, width * 0.45, height * 0.55);
+    ctxFront.fillText('PATIENT ID #:: ' + patientID, width * 0.38, height * 0.55);
 
     // Gender
     ctxFront.font = '16px Arial';
-    ctxFront.fillText('GENDER: ' + gender, width * 0.45, height * 0.72);
+    ctxFront.fillText('GENDER: ' + gender, width * 0.38, height * 0.72);
 
     // Contact
-    ctxFront.fillText('CONTACT: ' + contact, width * 0.45, height * 0.88);
+    ctxFront.fillText('CONTACT: ' + contact, width * 0.38, height * 0.88);
 
     // ===== RENDER BACK CARD =====
     printBack.width = width;
